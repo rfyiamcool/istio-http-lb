@@ -2,7 +2,11 @@
 
 ## dep
 
-golang
+golang 1.12
+
+kubernests 1.15
+
+istio 1.2.2
 
 ## build
 
@@ -13,9 +17,16 @@ cd backend; ./build.sh; cd ..
 
 ## run
 
+deploy k8s deployment and service
+
 ```
-kubectl apply -f backend.yaml
-kubectl apply -f frontend.yaml
+kubectl apply -f k8s-backend.yaml
+kubectl apply -f k8s-frontend.yaml
+```
+
+deploy base istio virtualService and DestinationRule
+
+```
 kubectl apply -f traffic-weights.yaml
 ```
 
@@ -43,11 +54,46 @@ retry
 kubectl apply -f vs-retry.yaml
 ```
 
-## test
+match user-agent
+
+```
+kubectl apply -f vs-header-match.yaml
+```
+
+rate limiter
+
+```
+kubectl apply -f vs-ratelimit.yaml
+```
+
+## api
+
+hostname
+
+```
+curl 127.0.0.1:3001/info
+```
+
+version and hostname
 
 ```
 curl 127.0.0.1:3001/hello
+```
+
+resp status code 555
+
+```
 curl 127.0.0.1:3001/abort
+```
+
+sleep 30 second
+
+```
 curl 127.0.0.1:3001/timeout
+```
+
+active raise error
+
+```
 curl 127.0.0.1:3001/retry
 ```
