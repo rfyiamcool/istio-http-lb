@@ -27,6 +27,11 @@ func main() {
 	}
 	js, _ := json.Marshal(hello)
 
+	http.HandleFunc("/info", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("new request", r.RemoteAddr, r.Header)
+		w.Write([]byte(hostname))
+	})
+
 	http.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("new request", r.RemoteAddr, r.Header)
 		w.Header().Set("Content-Type", "application/json")

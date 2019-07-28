@@ -21,6 +21,8 @@ var (
 	backendClient = http.Client{
 		Timeout: time.Second * 360,
 	}
+
+	hostname, _ = os.Hostname()
 )
 
 func main() {
@@ -28,8 +30,12 @@ func main() {
 		backend = "http://127.0.0.1:3000"
 	}
 
-	http.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/info", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("new request", r.RemoteAddr, r.Header)
+		w.Write([]byte(hostname))
+	})
+
+	http.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
 		body, status, err := httpRequest(w, r)
 		if err != nil {
 			return
@@ -48,7 +54,6 @@ func main() {
 	})
 
 	http.HandleFunc("/timeout", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("new request", r.RemoteAddr, r.Header)
 		body, status, err := httpRequest(w, r)
 		if err != nil {
 			return
@@ -60,7 +65,6 @@ func main() {
 	})
 
 	http.HandleFunc("/abort", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("new request", r.RemoteAddr, r.Header)
 		body, status, err := httpRequest(w, r)
 		if err != nil {
 			return
@@ -72,7 +76,6 @@ func main() {
 	})
 
 	http.HandleFunc("/retry", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("new request", r.RemoteAddr, r.Header)
 		body, status, err := httpRequest(w, r)
 		if err != nil {
 			return
@@ -88,9 +91,11 @@ func main() {
 
 func httpRequest(w http.ResponseWriter, r *http.Request) ([]byte, int, error) {
 	log.Println("new request", r.RemoteAddr, r.Header)
-	fmt.Printf("%s%s", backend, r.RequestURI)
+
 	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", backend, r.RequestURI), nil)
+	req.Header.Set("User-Agent", r.UserAgent())
 	req.Header.Set("Content", "Application/json")
+
 	resp, err := backendClient.Do(req)
 	if err != nil {
 		w.Write([]byte(err.Error()))
