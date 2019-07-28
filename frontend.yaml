@@ -1,9 +1,16 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: frontend-v1
+  labels:
+    app: frontend
+    version: v1
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+      version: v1
   template:
     metadata:
       labels:
@@ -16,7 +23,7 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: BACKEND
-          value: "http://backend/hello"
+          value: "http://backend"
         ports:
         - containerPort: 3001
 
@@ -27,30 +34,13 @@ kind: Service
 metadata:
   name: frontend
   labels:
-    serviceName: frontend
     app: frontend
     version: v1
 spec:
-  ports:
-  - port: 80
-    protocol: TCP
-    targetPort: 3001
   selector:
     app: frontend
-
-#apiVersion: extensions/v1beta1
-#kind: Ingress
-#metadata:
-#annotations:
-#    kubernetes.io/ingress.class: nginx
-#    nginx.ingress.kubernetes.io/add-base-url: "true"
-#    nginx.ingress.kubernetes.io/rewrite-target: /
-#  name: frontend
-  #spec:
-  #rules:
-  #- http:
-  #    paths:
-  #    - backend:
-  #            #serviceName: frontend
-          #servicePort: 80
-          #        path: /frontend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3001
+    protocol: TCP

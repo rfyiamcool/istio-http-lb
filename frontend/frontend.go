@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,27 +15,26 @@ type Hello struct {
 	HostName string
 }
 
+var (
+	backend = os.Getenv("BACKEND")
+
+	backendClient = http.Client{
+		Timeout: time.Second * 360,
+	}
+)
+
 func main() {
-	backend := os.Getenv("BACKEND")
 	if backend == "" {
-		backend = "http://127.0.0.1:3000/hello"
+		backend = "http://127.0.0.1:3000"
 	}
 
-	backendClient := http.Client{
-		Timeout: time.Second * 2,
-	}
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("new request", r.RemoteAddr, r.Header)
-		req, _ := http.NewRequest(http.MethodGet, backend, nil)
-		req.Header.Set("Content", "Application/json")
-		resp, err := backendClient.Do(req)
+		body, status, err := httpRequest(w, r)
 		if err != nil {
-			w.Write([]byte(err.Error()))
 			return
 		}
 
-		body, _ := ioutil.ReadAll(resp.Body)
 		hello := Hello{}
 		jsonErr := json.Unmarshal(body, &hello)
 		if jsonErr != nil {
@@ -42,9 +42,66 @@ func main() {
 			return
 		}
 
-		log.Printf("recv backend json: %+v", hello)
+		log.Printf("recv backend json: %v", string(body))
+		w.WriteHeader(status)
+		w.Write(body)
+	})
+
+	http.HandleFunc("/timeout", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("new request", r.RemoteAddr, r.Header)
+		body, status, err := httpRequest(w, r)
+		if err != nil {
+			return
+		}
+
+		log.Printf("recv backend body: %v", string(body))
+		w.WriteHeader(status)
+		w.Write(body)
+	})
+
+	http.HandleFunc("/abort", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("new request", r.RemoteAddr, r.Header)
+		body, status, err := httpRequest(w, r)
+		if err != nil {
+			return
+		}
+
+		log.Printf("recv backend json: %v", string(body))
+		w.WriteHeader(status)
+		w.Write(body)
+	})
+
+	http.HandleFunc("/retry", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("new request", r.RemoteAddr, r.Header)
+		body, status, err := httpRequest(w, r)
+		if err != nil {
+			return
+		}
+
+		log.Printf("recv backend json: %v", string(body))
+		w.WriteHeader(status)
 		w.Write(body)
 	})
 
 	http.ListenAndServe(":3001", nil)
+}
+
+func httpRequest(w http.ResponseWriter, r *http.Request) ([]byte, int, error) {
+	log.Println("new request", r.RemoteAddr, r.Header)
+	fmt.Printf("%s%s", backend, r.RequestURI)
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s%s", backend, r.RequestURI), nil)
+	req.Header.Set("Content", "Application/json")
+	resp, err := backendClient.Do(req)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return nil, 0, err
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return nil, 0, err
+	}
+
+	return body, resp.StatusCode, nil
 }

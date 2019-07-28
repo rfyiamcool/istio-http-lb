@@ -1,5 +1,5 @@
 
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend-v1
@@ -30,7 +30,7 @@ spec:
         - containerPort: 3000
 ---
 
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend-v2
@@ -72,7 +72,7 @@ spec:
   selector:
     app: backend
   ports:
-  - protocol: TCP
+  - name: http
     port: 80
     targetPort: 3000
 
