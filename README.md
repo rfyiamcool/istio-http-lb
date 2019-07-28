@@ -66,6 +66,12 @@ rate limiter
 kubectl apply -f vs-ratelimit.yaml
 ```
 
+mirror
+
+```
+kubectl apply -f vs-mirrot-to-v1.yaml
+```
+
 ## api
 
 hostname
