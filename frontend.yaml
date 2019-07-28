@@ -13,6 +13,7 @@ spec:
       containers:
       - name: frontend
         image: xiaorui/frontend
+        imagePullPolicy: IfNotPresent
         env:
         - name: BACKEND
           value: "http://backend/hello"
