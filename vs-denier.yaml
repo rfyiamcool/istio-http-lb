@@ -1,0 +1,31 @@
+apiVersion: "config.istio.io/v1alpha2"
+kind: handler
+metadata:
+  name: denyfrontend2backend
+spec:
+  compiledAdapter: denier
+  params:
+    status:
+      code: 7
+      message: Not allowed
+
+---
+
+apiVersion: "config.istio.io/v1alpha2"
+kind: instance
+metadata:
+  name: denyfrontend2backend
+spec:
+  compiledTemplate: checknothing
+
+---
+
+apiVersion: "config.istio.io/v1alpha2"
+kind: rule
+metadata:
+  name: denyfrontend2backend
+spec:
+  match: destination.labels["app"] == "backend" && source.labels["app"]=="frontend" && destination.labels["version"] == "v1"
+  actions:
+  - handler: denyfrontend2backend
+    instances: [ denyfrontend2backend]

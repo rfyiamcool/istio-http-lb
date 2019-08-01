@@ -7,14 +7,16 @@ spec:
   trafficPolicy:
     connectionPool:
       tcp:
-        maxConnections: 1
+        maxConnections: 50  # contain http
         connectTimeout: 5s
       http:
-        http1MaxPendingRequests: 1
-        http2MaxRequests: 1
-        maxRequestsPerConnection: 1
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 1000
+        maxRequestsPerConnection: 20
     outlierDetection:
-      consecutiveErrors: 1
-      interval: 1s
-      baseEjectionTime: 3m
-      maxEjectionPercent: 100
+      consecutiveErrors: 50
+      interval: 5s
+      baseEjectionTime: 10s
+      maxEjectionPercent: 50
+
+# https://istio.io/docs/reference/config/networking/v1alpha3/destination-rule/
