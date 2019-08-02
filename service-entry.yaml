@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: baidu.com-external-svc-dns
+spec:
+  hosts:
+  - baidu.com
+  location: MESH_EXTERNAL
+  ports:
+  - number: 80
+    name: http
+    protocol: HTTP
+  resolution: STATIC
+  endpoints:
+  - address: 123.58.180.7
+    ports:
+      http: 80
+
+# doc https://preliminary.istio.io/docs/reference/config/networking/v1alpha3/service-entry/
