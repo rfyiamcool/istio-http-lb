@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Sidecar
+metadata:
+  name: sidecar-test
+  namespace: default
+
+spec:
+  workloadSelector:
+    labels:
+      app: frontend
+
+  egress:
+  - hosts:
+    - "default/*"
+    - "istio-system/*"
+
+# only allow frontend request hosts in egress hosts list.
